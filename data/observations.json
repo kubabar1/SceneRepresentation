@@ -1,0 +1,86 @@
+{
+  "scenes": [
+    [
+      {
+        "file_path": "1/002.png",
+        "camera_position": [
+          10,
+          -10,
+          2
+        ],
+        "yaw": 45,
+        "pitch": 15
+      },
+      {
+        "file_path": "1/004.png",
+        "camera_position": [
+          10,
+          0,
+          2
+        ],
+        "yaw": 90,
+        "pitch": 15
+      },
+      {
+        "file_path": "1/006.png",
+        "camera_position": [
+          10,
+          10,
+          2
+        ],
+        "yaw": 135,
+        "pitch": 15
+      },
+      {
+        "file_path": "1/008.png",
+        "camera_position": [
+          0,
+          10,
+          2
+        ],
+        "yaw": 180,
+        "pitch": 15
+      },
+      {
+        "file_path": "1/010.png",
+        "camera_position": [
+          -10,
+          10,
+          2
+        ],
+        "yaw": 225,
+        "pitch": 15
+      },
+      {
+        "file_path": "1/012.png",
+        "camera_position": [
+          -10,
+          0,
+          2
+        ],
+        "yaw": 270,
+        "pitch": 15
+      },
+      {
+        "file_path": "1/014.png",
+        "camera_position": [
+          -10,
+          -10,
+          2
+        ],
+        "yaw": 315,
+        "pitch": 15
+      },
+      {
+        "file_path": "1/016.png",
+        "camera_position": [
+          0,
+          -10,
+          2
+        ],
+        "yaw": 0,
+        "pitch": 15
+      }
+    ]
+  ]
+}
