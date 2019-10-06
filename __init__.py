@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 import torch.nn.functional as F
 
-from nn.lstm.LSTMcellGQN import LSTMcellGQN
+from nn.lstm.GeneratorLSTMcell import LSTMcellGQN
 
 EPOCHS = 10
 LEARNING_RATE = 0.001

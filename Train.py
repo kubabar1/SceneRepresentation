@@ -1,6 +1,6 @@
 from torchvision import transforms
 
-from Encoder import Encoder
+from GQN import GQN
 from Properties import *
 from dataset.ScenesDataset import ScenesDataset, sample_batch
 
@@ -10,5 +10,5 @@ scenes_dataset = ScenesDataset(dataset_root_path=DATA_PATH, json_path=JSON_PATH,
 for t in range(S_max):
     D = sample_batch(scenes_dataset, B)
     ELBO = 0
-    encoder = Encoder()
-    encoder.estimate_ELBO(D, 2)
+    gqn = GQN()
+    gqn.estimate_ELBO(D, 2)
