@@ -1,7 +1,7 @@
 import torch.distributions
 from nn.lstm.GeneratorLSTMcell import GeneratorLSTMcell
 from nn.lstm.InferenceLSTMcell import InferenceLSTMcell
-from nn.cnn.RepresentationNN import *
+from nn.cnn.TowerRepresentationNN import *
 import torch.nn.functional as F
 from Properties import *
 
@@ -9,7 +9,7 @@ from Properties import *
 class GQN(nn.Module):
     def __init__(self):
         super(GQN, self).__init__()
-        self.model = RepresentationNN()
+        self.representation = TowerRepresentationNN()
         self.inference = InferenceLSTMcell()
         self.generator = GeneratorLSTMcell()
         self.conv1 = nn.ConvTranspose2d(128, 3, (5, 5), stride=(1, 1), padding=(2, 2))
@@ -49,7 +49,7 @@ class GQN(nn.Module):
             v_q_tensors.append(D[j][1][1].view(1, 7, 1, 1).to(DEVICE))
 
         for i in range(M):
-            r_k = self.model(x_tensors[i], v_tensors[i])
+            r_k = self.representation(x_tensors[i], v_tensors[i])
             r = r + r_k
 
         # print("#################################")
@@ -115,7 +115,7 @@ class GQN(nn.Module):
             v_tensors.append(torch.cat(tmp_v).to(DEVICE))
 
         for i in range(M):
-            r_k = self.model(x_tensors[i], v_tensors[i])
+            r_k = self.representation(x_tensors[i], v_tensors[i])
             r = r + r_k
 
         # print("#################################")
@@ -134,8 +134,6 @@ class GQN(nn.Module):
         for l in range(L):
             pi = torch.distributions.Normal(self.conv1(h_g), F.softplus(self.conv1(h_g)))
             z = pi.sample()
-            print(L)
-            print(z.size())
             c_g, h_g, u = self.generator(h_g, v_q, r, z, c_g, u)
         x_q = torch.distributions.Normal(self.conv2(u), sigma_t).sample()
         return x_q

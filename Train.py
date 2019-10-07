@@ -52,7 +52,5 @@ if __name__ == '__main__':
         print("#" + str(t) + " ELBO_loss=" + str(ELBO_loss.item()) + ", lr=" + str(scheduler.get_lr()[0]))
     x_q = model.generate(sample_batch(scenes_dataset, B), torch.tensor(
         [[[[10]], [[-10]], [[2]], [[math.cos(45)]], [[math.sin(45)]], [[math.cos(15)]], [[math.sin(15)]]]]).to(DEVICE), sigma_t)
-    print(x_q)
-    print(x_q.size())
     plt.imshow(tensor_to_image(x_q[0].cpu()))
     plt.show()

@@ -3,9 +3,9 @@ import torch.nn.functional as F
 import torch
 
 
-class RepresentationNN(nn.Module):
+class TowerRepresentationNN(nn.Module):
     def __init__(self):
-        super(RepresentationNN, self).__init__()
+        super(TowerRepresentationNN, self).__init__()
         # image 64x64x3
         self.conv1 = nn.Conv2d(3, 256, (2, 2), stride=(2, 2))
         self.conv1_skip = nn.Conv2d(256, 256, (1, 1), stride=(2, 2))
