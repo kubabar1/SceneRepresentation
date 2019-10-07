@@ -15,7 +15,7 @@ class GeneratorLSTMcell(LSTMcellGQN):
         # print(r.size())
         # print(h_g.size())
         # print(z.size())
-        # print(self.up_sample_v(v_q).size())
+        # print(self.up_sample_v(v_q))
         input = torch.cat([self.up_sample_v(v_q), r, h_g, z], dim=1)
         input = self.down_sample(input)
         ft = self.forget_layer(input)
