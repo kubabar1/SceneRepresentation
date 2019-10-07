@@ -14,7 +14,7 @@ class InferenceLSTMcell(LSTMcellGQN):
         # print("*********************************")
         # print(u.size())
         # print(self.down_sample_x_q(x_q).size())
-        input = torch.cat([self.down_sample_x_q(x_q), self.up_sample_v(v_q), h_g, h_e, r], dim=1)
+        input = torch.cat([self.down_sample_x_q(x_q), self.up_sample_v(v_q), h_g, h_e, r], dim=1)  # TODO: fix (add "u")
         # print(input.size())
 
         input = self.down_sample(input)
