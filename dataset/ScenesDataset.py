@@ -50,7 +50,7 @@ class ScenesDataset(VisionDataset):
         return self.scenes[idx]
 
 
-def sample_batch(scenes_set, B, M=None, K=None, device=torch.cuda.current_device()):
+def sample_batch(scenes_set, B, M=None, K=None, device=None):
     """
     Return batch of images and their viewpoints, converted to tensors.
 
