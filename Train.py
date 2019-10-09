@@ -6,7 +6,6 @@ from GQN import GQN
 from Properties import *
 from Tools import tensor_to_image
 from dataset.ScenesDataset import ScenesDataset, sample_batch
-import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 
 import torch
@@ -43,7 +42,7 @@ if __name__ == '__main__':
     sigma_t = sigma(0)
 
     for t in range(S_max):  # tqdm(range(S_max)):
-        D = sample_batch(scenes_dataset, B)
+        D = sample_batch(scenes_dataset, B=B, device=DEVICE)
         optimizer.zero_grad()
         ELBO_loss = model.estimate_ELBO(D, sigma_t)
         ELBO_loss.backward()
@@ -52,14 +51,17 @@ if __name__ == '__main__':
         mi_t = mi(t)
         sigma_t = sigma(t)
         print("#" + str(t) + " ELBO_loss=" + str(ELBO_loss.item()) + ", lr=" + str(scheduler.get_lr()[0]))
-    x_q = model.generate(sample_batch(scenes_dataset, B),
+
+    sample_batch = sample_batch(scenes_dataset, B, device=DEVICE)
+    x_q = model.generate(sample_batch,
                          torch.tensor([10, -10, 2, math.cos(45), math.sin(45), math.cos(15), math.sin(15)])
                          .view(1, 7, 1, 1).to(DEVICE), sigma_t)
-    fig = plt.figure()
-    img = Image.open('data/1/002.png')
-    img = img.resize((64, 64), Image.ANTIALIAS)
-    ax1 = fig.add_subplot(1, 2, 1)
-    ax1.imshow(img)
-    ax2 = fig.add_subplot(1, 2, 2)
-    ax2.imshow(tensor_to_image(x_q[0].cpu()))
-    plt.show()
+    for i in range(len(x_q)):
+        fig = plt.figure()
+        img = Image.open('data/1/002.png')
+        img = img.resize((64, 64), Image.ANTIALIAS)
+        ax1 = fig.add_subplot(1, 2, 1)
+        ax1.imshow(img)
+        ax2 = fig.add_subplot(1, 2, 2)
+        ax2.imshow(tensor_to_image(x_q[i].cpu()))
+        plt.show()

@@ -50,7 +50,7 @@ class ScenesDataset(VisionDataset):
         return self.scenes[idx]
 
 
-def sample_batch(scenes_set, B, M=None, K=None):
+def sample_batch(scenes_set, B, M=None, K=None, device=torch.cuda.current_device()):
     """
     Return batch of images and their viewpoints, converted to tensors.
 
@@ -67,11 +67,10 @@ def sample_batch(scenes_set, B, M=None, K=None):
     N = len(scenes_set)
     K = len(scenes_set[0]) if K is None else K
     M = random.randint(1, K) if M is None else M
-    D = []
-    x_tensors = [torch.Tensor() for _ in range(M)]
-    v_tensors = [torch.Tensor() for _ in range(M)]
-    x_q_tensor = torch.Tensor()
-    v_q_tensor = torch.Tensor()
+    x_tensors = [torch.Tensor().to(device) for _ in range(M)]
+    v_tensors = [torch.Tensor().to(device) for _ in range(M)]
+    x_q_tensor = torch.Tensor().to(device)
+    v_q_tensor = torch.Tensor().to(device)
     for _ in range(B):
         x_tensors_tmp = []
         v_tensors_tmp = []
@@ -86,21 +85,19 @@ def sample_batch(scenes_set, B, M=None, K=None):
             v_i = torch.tensor(
                 [v_i[0][0], v_i[0][1], v_i[0][2],
                  math.cos(v_i[0][3]), math.sin(v_i[0][3]),
-                 math.cos(v_i[0][4]), math.sin(v_i[0][4])])
+                 math.cos(v_i[0][4]), math.sin(v_i[0][4])]).view(1, 7, 1, 1)
             x_tensors_tmp.append(x_i)
             v_tensors_tmp.append(v_i)
         x_q, v_q = next(query_view_iterator)
         v_q = torch.tensor(
             [v_q[0][0], v_q[0][1], v_q[0][2], math.cos(v_q[0][3]), math.sin(v_q[0][3]), math.cos(v_q[0][4]),
-             math.sin(v_q[0][4])])
+             math.sin(v_q[0][4])]).view(1, 7, 1, 1)
 
         for i in range(M):
-            print(x_tensors[i].size())
-            print(x_tensors_tmp[i].size())
-            x_tensors[i] = torch.cat([x_tensors[i], x_tensors_tmp[i]])
-            v_tensors[i] = torch.cat([v_tensors[i], v_tensors_tmp[i]])
-        x_q_tensor = torch.cat([x_q_tensor, x_q])
-        v_q_tensor = torch.cat([v_q_tensor, v_q])
+            x_tensors[i] = torch.cat([x_tensors[i], x_tensors_tmp[i].to(device)])
+            v_tensors[i] = torch.cat([v_tensors[i], v_tensors_tmp[i].to(device)])
+        x_q_tensor = torch.cat([x_q_tensor, x_q.to(device)])
+        v_q_tensor = torch.cat([v_q_tensor, v_q.to(device)])
     return [x_tensors, v_tensors], [x_q_tensor, v_q_tensor]
 
 
