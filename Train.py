@@ -1,7 +1,7 @@
 from torchvision import transforms
 
 from GQN import GQN
-from Properties import IMAGE_RESIZE, DATA_PATH, JSON_PATH, EPSILON, B, DEVICE, S_MAX, BETA_1, BETA_2
+from Properties import IMAGE_RESIZE, DATA_PATH, JSON_PATH, EPSILON, B, DEVICE, S_MAX, BETA_1, BETA_2, MI_I
 from Utils import gamma, sigma, mi, show_image_comparation
 from dataset.ScenesDataset import ScenesDataset, sample_batch
 
@@ -18,7 +18,7 @@ if __name__ == '__main__':
     model.to(DEVICE)
 
     criterion = nn.NLLLoss()
-    optimizer = optim.Adam(model.parameters(), lr=gamma(0), betas=(BETA_1, BETA_2), eps=EPSILON)
+    optimizer = optim.Adam(model.parameters(), lr=MI_I, betas=(BETA_1, BETA_2), eps=EPSILON)
     scheduler = StepLR(optimizer, step_size=1, gamma=gamma(0))
 
     mi_t = mi(0)

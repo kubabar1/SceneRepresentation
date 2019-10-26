@@ -1,4 +1,5 @@
 import torch.nn as nn
+from torch.nn.modules.rnn import RNNCellBase
 
 
 class LSTMcellGQN(nn.Module):
@@ -8,5 +9,3 @@ class LSTMcellGQN(nn.Module):
         self.input_layer = nn.Sigmoid()
         self.output_layer = nn.Sigmoid()
         self.candidate_layer = nn.Tanh()
-        self.up_sample_h_g = nn.ConvTranspose2d(128, 128, (4, 4), stride=(4, 4))
-        self.up_sample_v = nn.ConvTranspose2d(7, 7, (16, 16))  # TODO: check

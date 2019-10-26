@@ -12,7 +12,7 @@ S_MAX = 5  # 2000000
 
 MI_I = 5 * 10 ** (-4)
 MI_F = 5 * 10 ** (-5)
-MI_N = 1.6 * 10 ** 6
+MI_N = S_MAX
 
 BETA_1 = 0.9
 BETA_2 = 0.999
@@ -26,13 +26,15 @@ SIGMA_N = 2 * 10 ** 5
 
 R_DIM = 16
 
-C_G_LEN = 128
-H_G_LEN = 128
-U_LEN = 128
+H_G_CHANNELS = 64
+C_G_CHANNELS = 64
+U_LEN = 64
 
-C_E_LEN = 128
-H_E_LEN = 128
+H_E_CHANNELS = 64
+C_E_CHANNELS = 64
 
 R_LEN = 256
 
-
+X_CHANNELS = 3
+V_CHANNELS = 7
+Z_CHANNELS = 3
