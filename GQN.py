@@ -11,10 +11,10 @@ class GQN(nn.Module):
     def __init__(self):
         super(GQN, self).__init__()
         self.representation = TowerRepresentationNN()
-        self.inference = InferenceLSTMcell(R_LEN + H_G_CHANNELS + X_CHANNELS + V_CHANNELS + U_LEN, H_E_CHANNELS)
-        self.generator = GeneratorLSTMcell(R_LEN + Z_CHANNELS + V_CHANNELS, H_G_CHANNELS)
-        self.conv1 = nn.ConvTranspose2d(H_G_CHANNELS, 3, (5, 5), stride=(1, 1), padding=(2, 2))
-        self.conv2 = nn.ConvTranspose2d(U_LEN, 3, (1, 1), stride=(1, 1))
+        self.inference = InferenceLSTMcell(R_DEPTH + H_G_DEPTH + X_DEPTH + V_DEPTH + U_DEPTH, H_E_DEPTH)
+        self.generator = GeneratorLSTMcell(R_DEPTH + Z_DEPTH + V_DEPTH, H_G_DEPTH)
+        self.conv1 = nn.ConvTranspose2d(H_G_DEPTH, 3, (5, 5), stride=(1, 1), padding=(2, 2))
+        self.conv2 = nn.ConvTranspose2d(U_DEPTH, 3, (1, 1), stride=(1, 1))
         self.up_sample_v = nn.ConvTranspose2d(7, 7, (16, 16))
         self.down_sample_x_q = nn.Conv2d(3, 3, (4, 4), stride=(4, 4))
         self.down_sample_u = nn.Conv2d(64, 64, (4, 4), stride=(4, 4))
@@ -25,20 +25,20 @@ class GQN(nn.Module):
         M = len(x_tensors)
         # B = x_tensors[0].size()[0]
 
-        r = torch.zeros((B, R_LEN, R_DIM, R_DIM)).to(DEVICE)
+        r = torch.zeros((B, R_DEPTH, R_DIM, R_DIM)).to(DEVICE)
 
         for i in range(M):
             r_k = self.representation(x_tensors[i], v_tensors[i])
             r = r + r_k
 
         # Generator initial state
-        c_g = torch.zeros([B, C_G_CHANNELS, R_DIM, R_DIM]).to(DEVICE)
-        h_g = torch.zeros([B, H_G_CHANNELS, R_DIM, R_DIM]).to(DEVICE)
-        u = torch.zeros([B, U_LEN, 4 * R_DIM, 4 * R_DIM]).to(DEVICE)
+        c_g = torch.zeros([B, C_G_DEPTH, R_DIM, R_DIM]).to(DEVICE)
+        h_g = torch.zeros([B, H_G_DEPTH, R_DIM, R_DIM]).to(DEVICE)
+        u = torch.zeros([B, U_DEPTH, 4 * R_DIM, 4 * R_DIM]).to(DEVICE)
 
         # Interference initial state
-        c_e = torch.zeros([B, C_E_CHANNELS, R_DIM, R_DIM]).to(DEVICE)
-        h_e = torch.zeros([B, H_E_CHANNELS, R_DIM, R_DIM]).to(DEVICE)
+        c_e = torch.zeros([B, C_E_DEPTH, R_DIM, R_DIM]).to(DEVICE)
+        h_e = torch.zeros([B, H_E_DEPTH, R_DIM, R_DIM]).to(DEVICE)
 
         # ELBO initial state
         ELBO = 0
@@ -58,7 +58,7 @@ class GQN(nn.Module):
         return ELBO
 
     def generate(self, D, v_q, sigma_t):
-        r = torch.zeros((B, R_LEN, R_DIM, R_DIM)).to(DEVICE)
+        r = torch.zeros((B, R_DEPTH, R_DIM, R_DIM)).to(DEVICE)
         [x_tensors, v_tensors], _ = D
         M = len(x_tensors)
         # B = x_tensors[0].size()[0]
@@ -70,9 +70,9 @@ class GQN(nn.Module):
         v_q = v_q.expand(B, v_q.size()[1], v_q.size()[2], v_q.size()[3])
 
         # Generator initial state
-        c_g = torch.zeros([B, C_G_CHANNELS, R_DIM, R_DIM]).to(DEVICE)
-        h_g = torch.zeros([B, H_G_CHANNELS, R_DIM, R_DIM]).to(DEVICE)
-        u = torch.zeros([B, U_LEN, 4 * R_DIM, 4 * R_DIM]).to(DEVICE)
+        c_g = torch.zeros([B, C_G_DEPTH, R_DIM, R_DIM]).to(DEVICE)
+        h_g = torch.zeros([B, H_G_DEPTH, R_DIM, R_DIM]).to(DEVICE)
+        u = torch.zeros([B, U_DEPTH, 4 * R_DIM, 4 * R_DIM]).to(DEVICE)
 
         for l in range(L):
             pi = torch.distributions.Normal(self.conv1(h_g), F.softplus(self.conv1(h_g)))
