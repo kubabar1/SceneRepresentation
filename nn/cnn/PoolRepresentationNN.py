@@ -3,17 +3,17 @@ import torch.nn.functional as F
 import torch
 
 
-class PoolsRepresentationNN(nn.Module):
+class PoolRepresentationNN(nn.Module):
     def __init__(self):
-        super(PoolsRepresentationNN, self).__init__()
+        super(PoolRepresentationNN, self).__init__()
         self.conv1 = nn.Conv2d(3, 256, (2, 2), stride=(2, 2))
         self.conv2 = nn.Conv2d(256, 128, (3, 3), stride=(1, 1), padding=(1, 1))
         self.conv3 = nn.Conv2d(128, 256, (2, 2), stride=(2, 2))
-        self.conv4 = nn.Conv2d(256 + 7, 128, (3, 3), stride=(1, 1), padding=(1, 1))
+        self.conv4 = nn.Conv2d(263, 128, (3, 3), stride=(1, 1), padding=(1, 1))
         self.conv5 = nn.Conv2d(128, 256, (3, 3), stride=(1, 1), padding=(1, 1))
         self.conv6 = nn.Conv2d(256, 256, (1, 1), stride=(1, 1))
         self.conv_skip_1 = nn.Conv2d(256, 256, (2, 2), stride=(2, 2))
-        self.conv_skip_2 = nn.Conv2d(256 + 7, 256, (3, 3), stride=(1, 1), padding=(1, 1))
+        self.conv_skip_2 = nn.Conv2d(263, 256, (3, 3), stride=(1, 1), padding=(1, 1))
         self.pool = nn.AvgPool2d(kernel_size=(16, 16))
 
     def forward(self, x, v):
