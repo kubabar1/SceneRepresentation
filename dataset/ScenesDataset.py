@@ -12,8 +12,6 @@ import random
 from torch.utils.data import DataLoader
 from torch.utils.data.sampler import RandomSampler
 
-from Properties import IMAGE_RESIZE
-
 
 class ScenesDataset(VisionDataset):
     def __init__(self, dataset_root_path, json_path, transform=None):
@@ -99,19 +97,3 @@ def sample_batch(scenes_set, B, M=None, K=None, device=None):
         x_q_tensor = torch.cat([x_q_tensor, x_q.to(device)])
         v_q_tensor = torch.cat([v_q_tensor, v_q.to(device)])
     return [x_tensors, v_tensors], [x_q_tensor, v_q_tensor]
-
-
-if __name__ == '__main__':
-    transform = transforms.Compose([transforms.Resize(IMAGE_RESIZE)])
-    dataset = ScenesDataset('../data', '../data/observations.json', transform=transform)
-    scenes = iter(dataset)
-    for scene in scenes:
-        for observation in scene:
-            print(observation[1])
-
-    [x_tensors, v_tensors], [x_q_tensor, v_q_tensor] = sample_batch(dataset, 36)
-    M = len(x_tensors)
-
-    print('####################################')
-    for i in range(M):
-        print(v_tensors[i].size())
