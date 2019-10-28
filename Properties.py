@@ -1,12 +1,14 @@
 import torch
 
+from nn.cnn.RepresentationNNTypes import RepresentationNNTypes
+
 
 class Properties:
     def __init__(self,
                  device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
                  data_path='data',
                  json_path='data/observations.json',
-                 representation='tower',
+                 representation=RepresentationNNTypes.TOWER,
 
                  L=12,
                  B=36,
@@ -37,7 +39,7 @@ class Properties:
 
         self.data_path = data_path
         self.json_path = json_path
-        self.image_resize = (64, 64)  # TODO make adjustable by constructor
+        self.image_resize = (64, 64)  # TODO make adjustable by constructor (check if possible)
 
         self.L = L
         self.B = B
@@ -56,7 +58,7 @@ class Properties:
         self.sigma_F = sigma_F
         self.sigma_N = sigma_N
 
-        self.R_dim = 16 if representation == 'tower' else 1
+        self.R_dim = 16 if RepresentationNNTypes.TOWER == representation else 1
 
         self.H_g_depth = H_g_depth
         self.C_g_depth = C_g_depth
@@ -71,4 +73,4 @@ class Properties:
         self.V_depth = V_depth
         self.Z_depth = Z_depth
 
-        self.Z_dim = 16  # TODO make adjustable by constructor
+        self.Z_dim = 16  # TODO make adjustable by constructor (check if possible)

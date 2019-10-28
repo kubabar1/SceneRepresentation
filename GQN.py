@@ -2,16 +2,25 @@ import torch.distributions
 from torch import nn
 from torch.distributions import kl_divergence, Normal
 
+from nn.cnn.RepresentationNNTypes import RepresentationNNTypes
 from nn.lstm.GeneratorLSTMcell import GeneratorLSTMcell
 from nn.lstm.InferenceLSTMcell import InferenceLSTMcell
 from nn.cnn.TowerRepresentationNN import TowerRepresentationNN
+from nn.cnn.PyramidRepresentationNN import PyramidRepresentationNN
+from nn.cnn.PoolRepresentationNN import PoolRepresentationNN
 
 
 class GQN(nn.Module):
     def __init__(self, properties):
         super(GQN, self).__init__()
         self.properties = properties
-        self.representation = TowerRepresentationNN()
+        self.tmp = RepresentationNNTypes.POOL
+        if properties.representation[0] is RepresentationNNTypes.POOL:
+            self.representation = PoolRepresentationNN()
+        elif properties.representation[0] is RepresentationNNTypes.PYRAMID:
+            self.representation = PyramidRepresentationNN()
+        else:
+            self.representation = TowerRepresentationNN()
         self.inference = InferenceLSTMcell(
             properties.R_depth + properties.H_g_depth + properties.X_depth + properties.V_depth + properties.U_depth,
             properties.H_e_depth)
