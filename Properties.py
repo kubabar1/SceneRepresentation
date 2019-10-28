@@ -22,7 +22,7 @@ class Properties:
                  sigma_I=2.0,
                  sigma_F=0.7,
                  sigma_N=2 * 10 ** 5,
-                 H_g_depth=64,  # wszystko od H_g_depth do C_e_depth musi mieć taką samą wartość aby działało
+                 H_g_depth=64,  # every property from H_g_depth to C_e_depth must have this same value to work properly
                  C_g_depth=64,
                  U_depth=64,
                  H_e_depth=64,

@@ -3,11 +3,10 @@ from torch import nn
 from torch.distributions import kl_divergence, Normal
 
 from nn.cnn.RepresentationNNTypes import RepresentationNNTypes
-from nn.lstm.GeneratorLSTMcell import GeneratorLSTMcell
-from nn.lstm.InferenceLSTMcell import InferenceLSTMcell
 from nn.cnn.TowerRepresentationNN import TowerRepresentationNN
 from nn.cnn.PyramidRepresentationNN import PyramidRepresentationNN
 from nn.cnn.PoolRepresentationNN import PoolRepresentationNN
+from nn.lstm.LSTMcellGQN import LSTMcellGQN
 
 
 class GQN(nn.Module):
@@ -21,10 +20,10 @@ class GQN(nn.Module):
             self.representation = PyramidRepresentationNN()
         else:
             self.representation = TowerRepresentationNN()
-        self.inference = InferenceLSTMcell(
+        self.inference = LSTMcellGQN(
             properties.R_depth + properties.H_g_depth + properties.X_depth + properties.V_depth + properties.U_depth,
             properties.H_e_depth)
-        self.generator = GeneratorLSTMcell(properties.R_depth + properties.Z_depth + properties.V_depth,
+        self.generator = LSTMcellGQN(properties.R_depth + properties.Z_depth + properties.V_depth,
                                            properties.H_g_depth)
         # self.down_sample_prior = nn.ConvTranspose2d(H_G_DEPTH, 3, (5, 5), stride=(1, 1), padding=(2, 2))
         self.down_sample_prior = nn.ConvTranspose2d(properties.H_g_depth, properties.Z_depth * 2, (5, 5), stride=(1, 1),
