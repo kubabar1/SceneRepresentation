@@ -20,7 +20,7 @@ class ScenesDataset(VisionDataset):
         self.json_path = json_path
         self.scenes = []
 
-        with open(Path(json_path), "r") as json_file:
+        with open(str(Path(json_path)), "r") as json_file:
             observations_json = json.loads(json_file.read())
             for scene in observations_json['scenes']:
                 scene_tmp = []
@@ -30,7 +30,7 @@ class ScenesDataset(VisionDataset):
                 self.scenes.append(scene_tmp)
 
     def _get_observation_from_json_obs(self, observation):
-        image_path = os.path.join(self.dataset_root_path, Path(observation['file_path']))
+        image_path = os.path.join(str(self.dataset_root_path), str(Path(observation['file_path'])))
         camera_position = observation['camera_position']
         yaw = observation['yaw']
         pitch = observation['pitch']
