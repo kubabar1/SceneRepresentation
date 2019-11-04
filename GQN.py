@@ -14,9 +14,9 @@ class GQN(nn.Module):
         super(GQN, self).__init__()
         self.properties = properties
         self.tmp = RepresentationNNTypes.POOL
-        if properties.representation[0] is RepresentationNNTypes.POOL:
+        if properties.representation is RepresentationNNTypes.POOL:
             self.representation = PoolRepresentationNN()
-        elif properties.representation[0] is RepresentationNNTypes.PYRAMID:
+        elif properties.representation is RepresentationNNTypes.PYRAMID:
             self.representation = PyramidRepresentationNN()
         else:
             self.representation = TowerRepresentationNN()
@@ -24,7 +24,7 @@ class GQN(nn.Module):
             properties.R_depth + properties.H_g_depth + properties.X_depth + properties.V_depth + properties.U_depth,
             properties.H_e_depth)
         self.generator = LSTMcellGQN(properties.R_depth + properties.Z_depth + properties.V_depth,
-                                           properties.H_g_depth)
+                                     properties.H_g_depth)
         # self.down_sample_prior = nn.ConvTranspose2d(H_G_DEPTH, 3, (5, 5), stride=(1, 1), padding=(2, 2))
         self.down_sample_prior = nn.ConvTranspose2d(properties.H_g_depth, properties.Z_depth * 2, (5, 5), stride=(1, 1),
                                                     padding=(2, 2))
@@ -78,7 +78,7 @@ class GQN(nn.Module):
             z_mu_q, z_var_q = torch.chunk(self.down_sample_prior(h_e), 2, dim=1)
             q = torch.distributions.Normal(z_mu_q, torch.exp(z_var_q / 2))
 
-            z = q.rsample()  # TODO check difference between rsample and sample
+            z = q.rsample()
 
             c_g, h_g = self.generator(torch.cat(
                 [self.up_sample_v(v_q),
@@ -113,7 +113,7 @@ class GQN(nn.Module):
             z_mu_pi, z_var_pi = torch.chunk(self.down_sample_prior(h_g), 2, dim=1)
             pi = torch.distributions.Normal(z_mu_pi, torch.exp(z_var_pi / 2))
 
-            z = pi.sample()
+            z = pi.rsample()
 
             c_g, h_g = self.generator(torch.cat(
                 [self.up_sample_v(v_q),
@@ -121,6 +121,5 @@ class GQN(nn.Module):
                  z], dim=1), (h_g, c_g))
             u += self.up_sample_h_g(h_g)
 
-        x_q = torch.distributions.Normal(self.down_sample_u_res(u),
-                                         sigma_t).rsample()  # TODO check difference between rsample and sample
+        x_q = torch.distributions.Normal(self.down_sample_u_res(u), sigma_t).rsample()
         return torch.clamp(x_q, 0, 1)
