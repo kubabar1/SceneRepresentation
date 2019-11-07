@@ -1,13 +1,18 @@
 import torch
 
+from dataset.DatasetType import DatasetType
 from nn.cnn.RepresentationNNTypes import RepresentationNNTypes
 
 
 class Properties:
     def __init__(self,
                  device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
+                 dataset_type=DatasetType.DEEPMIND,
                  data_path='data',
                  json_path='data/observations.json',
+                 deepmind_dataset='rooms_ring_camera',
+                 deepmind_dataset_context_size=9,
+                 deepmind_dataset_root_path='dataset/deepmind_dataset/datasets',
                  representation=RepresentationNNTypes.TOWER,
 
                  L=12,
@@ -35,10 +40,15 @@ class Properties:
                  ):
         self.device = device
 
-        self.representation = representation,
+        self.representation = representation
 
+        self.dataset_type = dataset_type
+        self.deepmind_dataset = deepmind_dataset
+        self.deepmind_dataset_context_size = deepmind_dataset_context_size
+        self.deepmind_dataset_root_path = deepmind_dataset_root_path
         self.data_path = data_path
         self.json_path = json_path
+
         self.image_resize = (64, 64)  # TODO make adjustable by constructor (check if possible)
 
         self.L = L
