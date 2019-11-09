@@ -1,70 +1,105 @@
-import math
-import torchvision
+import os.path
+import torch
 from torchvision import transforms
-
 from GQN import GQN
 from Properties import Properties
 from dataset.DatasetType import DatasetType
-from Reader import sample_batch_deepmind
-from Utils import sigma, show_image_comparation
-from data_reader import DataReader
+from Utils import sigma, save_model, save_image_comparation, load_model
 from dataset.ScenesDataset import ScenesDataset, sample_batch
-
 from torch import optim
-
+from dataset.deepmind_dataset.Reader import sample_batch_deepmind
+from dataset.deepmind_dataset.data_reader import DataReader
 from nn.optim.Scheduler import Scheduler
+import logging
 
-if __name__ == '__main__':
-    properties = Properties()
 
-    transform = transforms.Compose([transforms.Resize(properties.image_resize)])
-    scenes_dataset = ScenesDataset(dataset_root_path=properties.data_path,
-                                   json_path=properties.json_path,
-                                   transform=transform)
-    deepmind_train_dataset_reader = DataReader(dataset=properties.deepmind_dataset,
-                                               context_size=properties.deepmind_dataset_context_size,
-                                               root=properties.deepmind_dataset_root_path,
-                                               mode='train')
+class Train:
+    def __init__(self):
+        self.properties = Properties()
+        self.transform = transforms.Compose([transforms.Resize(self.properties.image_resize)])
 
-    deepmind_test_dataset_reader = DataReader(dataset=properties.deepmind_dataset,
-                                              context_size=properties.deepmind_dataset_context_size,
-                                              root=properties.deepmind_dataset_root_path,
-                                              mode='test')
+    def train(self):
+        model = GQN(self.properties).to(self.properties.device)
+        optimizer = optim.Adam(model.parameters(), lr=self.properties.mi_I,
+                               betas=(self.properties.beta_1, self.properties.beta_2),
+                               eps=self.properties.epsilon)
+        scheduler = Scheduler(optimizer, properties=self.properties)
+        sigma_t = self.properties.sigma_I
+        self._train(model=model, optimizer=optimizer, scheduler=scheduler, start_epoch=0, sigma_t=sigma_t)
 
-    model = GQN(properties).to(properties.device)
+    def train_loaded_model(self, model_path):
+        model, start_epoch, optimizer, loss, sigma_t, scheduler = load_model(model_path, self.properties)
+        model = model.to(self.properties.device)
+        optimizer = optimizer.to(self.properties.device)
+        scheduler = scheduler.to(self.properties.device)
+        self._train(model=model, optimizer=optimizer, scheduler=scheduler, start_epoch=start_epoch + 1, sigma_t=sigma_t)
 
-    optimizer = optim.Adam(model.parameters(), lr=properties.mi_I, betas=(properties.beta_1, properties.beta_2),
-                           eps=properties.epsilon)
-    scheduler = Scheduler(optimizer, properties=properties)
+    def _train(self, model, optimizer, scheduler, start_epoch, sigma_t):
+        if not os.path.exists(os.path.dirname(self.properties.log_file_path)):
+            os.makedirs(os.path.dirname(self.properties.log_file_path))
+        logging.basicConfig(filename=self.properties.log_file_path,
+                            format='%(asctime)s %(message)s',
+                            filemode='w')
+        logger = logging.getLogger()
+        logger.setLevel(logging.INFO)
 
-    sigma_t = properties.sigma_I
+        scenes_dataset = ScenesDataset(dataset_root_path=self.properties.data_path,
+                                       json_path=self.properties.json_path,
+                                       transform=self.transform)
+        deepmind_train_dataset_reader = DataReader(dataset=self.properties.deepmind_dataset,
+                                                   context_size=self.properties.deepmind_dataset_context_size,
+                                                   root=self.properties.deepmind_dataset_root_path,
+                                                   mode='train')
 
-    for t in range(properties.s_max):
-        D = sample_batch(scenes_dataset, B=properties.B, device=properties.device) \
-            if properties.dataset_type is DatasetType.LOCAL \
-            else sample_batch_deepmind(deepmind_train_dataset_reader.read(batch_size=properties.B), B=properties.B,
-                                       device=properties.device)
+        deepmind_test_dataset_reader = DataReader(dataset=self.properties.deepmind_dataset,
+                                                  context_size=self.properties.deepmind_dataset_context_size,
+                                                  root=self.properties.deepmind_dataset_root_path,
+                                                  mode='test')
 
-        ELBO_loss, _ = model.estimate_ELBO(D, sigma_t)
+        for epoch in range(start_epoch, self.properties.s_max):
+            if self.properties.dataset_type is DatasetType.LOCAL:
+                D = sample_batch(scenes_dataset, B=self.properties.B, device=self.properties.device)
+            else:
+                D = sample_batch_deepmind(deepmind_train_dataset_reader.read(batch_size=self.properties.B),
+                                          B=self.properties.B,
+                                          device=self.properties.device)
 
-        # TODO: test flow and save model
+            if epoch % self.properties.test_interval == 0:
+                with torch.no_grad():
+                    D_test = sample_batch(scenes_dataset, B=self.properties.B, device=self.properties.device) \
+                        if self.properties.dataset_type is DatasetType.LOCAL \
+                        else sample_batch_deepmind(deepmind_test_dataset_reader.read(batch_size=self.properties.B),
+                                                   B=self.properties.B,
+                                                   device=self.properties.device)
+                    [x_tensor_test, v_tensor_test], [x_q_tensor_test, v_q_tensor_test] = D_test
+                    ELBO_loss_test, kl = model.estimate_ELBO(D_test, sigma_t)
+                    x_q_generated = model.generate([x_tensor_test, v_tensor_test], v_q_tensor_test)
 
-        (-ELBO_loss.mean()).backward()
-        optimizer.step()
-        optimizer.zero_grad()
-        scheduler.step()
-        sigma_t = sigma(properties.sigma_F, properties.sigma_I, properties.sigma_N, t)
-        print("#" + str(t) + " ELBO_loss=" + str(-ELBO_loss.mean().item()) + ", lr=" + str(scheduler.get_lr()[0]))
+                    log_test_text = "TEST_" + str(epoch) + " ELBO_loss_test=" \
+                                    + str(-ELBO_loss_test.mean().item()) + ", kl=" + str(kl.mean().item())
+                    print(log_test_text)
+                    logger.info(log_test_text)
 
-    # TODO: save model
+                    if epoch % self.properties.save_images == 0:
+                        save_image_comparation(generated_x=x_q_generated,
+                                               reference_x=x_q_tensor_test,
+                                               generated_images_path=self.properties.generated_images_path,
+                                               referenced_images_path=self.properties.referenced_images_path,
+                                               epoch=epoch)
 
-    D_test = sample_batch(scenes_dataset, B=properties.B, device=properties.device) \
-        if properties.dataset_type is DatasetType.LOCAL \
-        else sample_batch_deepmind(deepmind_test_dataset_reader.read(batch_size=properties.B), B=properties.B,
-                                   device=properties.device)
+            ELBO_loss, _ = model.estimate_ELBO(D, sigma_t)
+            (-ELBO_loss.mean()).backward()
+            optimizer.step()
+            optimizer.zero_grad()
+            scheduler.step()
+            sigma_t = sigma(self.properties.sigma_F, self.properties.sigma_I, self.properties.sigma_N, epoch)
 
-    _, [x_tensor_ref, v_tensor_ref] = D_test
+            log_train_text = "TRAIN_" + str(epoch) + " ELBO_loss=" + str(-ELBO_loss.mean().item()) + ", lr=" \
+                             + str(str(scheduler.get_lr()[0]))
+            print(log_train_text)
+            logger.info(log_train_text)
 
-    x_q = model.generate(D_test, v_tensor_ref, sigma_t)
+            if epoch % self.properties.save_model_interval == 0:
+                save_model(model, epoch, optimizer, ELBO_loss, sigma_t, scheduler, self.properties.save_model_path)
 
-    show_image_comparation(x_q, x_tensor_ref)
+        save_model(model, epoch, optimizer, ELBO_loss, sigma_t, scheduler, self.properties.save_model_path)

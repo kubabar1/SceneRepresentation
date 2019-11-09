@@ -1,7 +1,11 @@
+import os.path
 import math
 import torch
 import matplotlib.pyplot as plt
 import torchvision
+from torch import optim
+
+from GQN import GQN
 
 
 def mi(mi_I, mi_F, mi_N, t):
@@ -21,15 +25,58 @@ def tensor_to_image(tensor_image):
 
 
 def show_image_comparation(generated_x, reverence_x):
-    plt.figure()
+    plt.figure(1)
     plt.axis('off')
-    plt.imshow(torchvision.utils.make_grid(generated_x, nrow=int(math.sqrt(generated_x.size()[0]))).cpu().detach().numpy().transpose((1, 2, 0)))
+    plt.imshow(
+        torchvision.utils.make_grid(generated_x, nrow=int(math.sqrt(generated_x.size()[0]))).cpu().numpy().transpose(
+            (1, 2, 0)))
 
-    plt.figure()
+    plt.figure(2)
     plt.axis('off')
-    plt.imshow(torchvision.utils.make_grid(reverence_x, nrow=int(math.sqrt(generated_x.size()[0]))).cpu().detach().numpy().transpose((1, 2, 0)))
-
+    plt.imshow(
+        torchvision.utils.make_grid(reverence_x, nrow=int(math.sqrt(generated_x.size()[0]))).cpu().numpy().transpose(
+            (1, 2, 0)))
     plt.show()
+
+
+def save_image_comparation(generated_x, reference_x, generated_images_path, referenced_images_path, epoch):
+    if not os.path.exists(generated_images_path):
+        os.makedirs(generated_images_path)
+    if not os.path.exists(referenced_images_path):
+        os.makedirs(referenced_images_path)
+    torchvision.utils.save_image(generated_x,
+                                 os.path.join(generated_images_path, "generated_" + str(epoch) + ".png"),
+                                 nrow=int(math.sqrt(generated_x.size()[0])))
+    torchvision.utils.save_image(reference_x,
+                                 os.path.join(referenced_images_path, "referenced_" + str(epoch) + ".png"),
+                                 nrow=int(math.sqrt(reference_x.size()[0])))
+
+
+def save_model(model, epoch, optimizer, loss, sigma_t, scheduler, save_model_path):
+    if not os.path.exists(save_model_path):
+        os.makedirs(save_model_path)
+    torch.save({
+        'epoch': epoch,
+        'model_state_dict': model.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
+        'scheduler_state_dict': scheduler.state_dict(),
+        'loss': loss,
+        'sigma_t': sigma_t
+    }, os.path.join(save_model_path, "model_" + str(epoch) + ".pt"))
+
+
+def load_model(model_path, properties):
+    model = GQN(properties).to(properties.device)
+    optimizer = optim.Adam(model.parameters(), lr=properties.mi_I, betas=(properties.beta_1, properties.beta_2),
+                           eps=properties.epsilon)
+    checkpoint = torch.load(model_path)
+    model.load_state_dict(checkpoint['model_state_dict'])
+    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    scheduler = checkpoint['scheduler_state_dict']
+    epoch = checkpoint['epoch']
+    loss = checkpoint['loss']
+    sigma_t = checkpoint['sigma_t']
+    return model, epoch, optimizer, loss, sigma_t, scheduler
 
 
 def test(text: str, align: bool = True) -> str:

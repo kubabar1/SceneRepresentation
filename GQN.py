@@ -85,14 +85,15 @@ class GQN(nn.Module):
 
             kl += torch.sum(kl_divergence(q, pi), dim=[1, 2, 3])
             ELBO -= torch.sum(kl_divergence(q, pi), dim=[1, 2, 3])
+            # torch.Size([B]) - loses for each bach (single loss is sum of individual pixel losses)
 
         ELBO += torch.sum(Normal(self.down_sample_u_res(u), sigma_t).log_prob(x_q), dim=[1, 2, 3])
 
         return ELBO, kl
 
-    def generate(self, D, v_q, sigma_t):
+    def generate(self, test_data, v_q):
         device = self.properties.device
-        [x_tensors, v_tensors], _ = D
+        [x_tensors, v_tensors] = test_data
         M = len(x_tensors)
         B = x_tensors[0].size()[0]
 
