@@ -13,7 +13,6 @@ class GQN(nn.Module):
     def __init__(self, properties):
         super(GQN, self).__init__()
         self.properties = properties
-        self.tmp = RepresentationNNTypes.POOL
         if properties.representation is RepresentationNNTypes.POOL:
             self.representation = PoolRepresentationNN()
         elif properties.representation is RepresentationNNTypes.PYRAMID:
@@ -49,18 +48,16 @@ class GQN(nn.Module):
             r_k = self.representation(x[i], v[i])
             r += r_k
 
-        # Generator initial state
         c_g = torch.zeros([B, self.properties.C_g_depth, self.properties.Z_dim, self.properties.Z_dim]).to(device)
         h_g = torch.zeros([B, self.properties.H_g_depth, self.properties.Z_dim, self.properties.Z_dim]).to(device)
         u = torch.zeros([B, self.properties.U_depth, 4 * self.properties.Z_dim, 4 * self.properties.Z_dim]).to(device)
 
-        # Interference initial state
         c_e = torch.zeros([B, self.properties.C_e_depth, self.properties.Z_dim, self.properties.Z_dim]).to(device)
         h_e = torch.zeros([B, self.properties.H_e_depth, self.properties.Z_dim, self.properties.Z_dim]).to(device)
 
-        # ELBO initial state
         ELBO = 0
 
+        kl = 0
         for l in range(self.properties.L):
             # pi = torch.distributions.Normal(self.down_sample_prior(h_g), F.softplus(self.down_sample_prior(h_g)))
             z_mu_pi, z_var_pi = torch.chunk(self.down_sample_prior(h_g), 2, dim=1)
@@ -86,11 +83,12 @@ class GQN(nn.Module):
                  z], dim=1), (h_g, c_g))
             u = u + self.up_sample_h_g(h_g)
 
+            kl += torch.sum(kl_divergence(q, pi), dim=[1, 2, 3])
             ELBO -= torch.sum(kl_divergence(q, pi), dim=[1, 2, 3])
 
         ELBO += torch.sum(Normal(self.down_sample_u_res(u), sigma_t).log_prob(x_q), dim=[1, 2, 3])
 
-        return ELBO
+        return ELBO, kl
 
     def generate(self, D, v_q, sigma_t):
         device = self.properties.device
@@ -119,7 +117,16 @@ class GQN(nn.Module):
                 [self.up_sample_v(v_q),
                  r if h_g.size()[2] == r.size()[2] else self.up_sample_r(r),
                  z], dim=1), (h_g, c_g))
-            u += self.up_sample_h_g(h_g)
+            u = u + self.up_sample_h_g(h_g)
 
-        x_q = torch.distributions.Normal(self.down_sample_u_res(u), sigma_t).rsample()
-        return torch.clamp(x_q, 0, 1)
+        # version 1
+        # x_q = torch.distributions.Normal(self.down_sample_u_res(u), sigma_t).rsample()
+        # return torch.clamp(x_q, 0, 1)
+
+        # version 2
+        # x_q = self.down_sample_u_res(u)
+        # return torch.clamp(x_q, 0, 1)
+
+        # version 3
+        x_q = self.down_sample_u_res(u)
+        return torch.sigmoid(x_q)

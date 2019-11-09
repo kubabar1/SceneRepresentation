@@ -1,6 +1,7 @@
 import math
 import torch
 import matplotlib.pyplot as plt
+import torchvision
 
 
 def mi(mi_I, mi_F, mi_N, t):
@@ -19,13 +20,15 @@ def tensor_to_image(tensor_image):
     return torch.squeeze(tensor_image).permute(1, 2, 0)
 
 
-def show_image_comparation(reference_img, reverence_v, result_img):
-    fig = plt.figure()
-    fig.suptitle('v = [' + ', '.join(map(str, reverence_v.cpu().view(7).numpy())) + ']')
-    ax1 = fig.add_subplot(1, 2, 1)
-    ax1.imshow(tensor_to_image(reference_img.cpu()))
-    ax2 = fig.add_subplot(1, 2, 2)
-    ax2.imshow(tensor_to_image(result_img.cpu().detach()))
+def show_image_comparation(generated_x, reverence_x):
+    plt.figure()
+    plt.axis('off')
+    plt.imshow(torchvision.utils.make_grid(generated_x, nrow=int(math.sqrt(generated_x.size()[0]))).cpu().detach().numpy().transpose((1, 2, 0)))
+
+    plt.figure()
+    plt.axis('off')
+    plt.imshow(torchvision.utils.make_grid(reverence_x, nrow=int(math.sqrt(generated_x.size()[0]))).cpu().detach().numpy().transpose((1, 2, 0)))
+
     plt.show()
 
 

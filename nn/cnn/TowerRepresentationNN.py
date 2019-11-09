@@ -6,14 +6,14 @@ import torch
 class TowerRepresentationNN(nn.Module):
     def __init__(self):
         super(TowerRepresentationNN, self).__init__()
-        self.conv1 = nn.Conv2d(3, 256, (2, 2), stride=(2, 2))
-        self.conv2 = nn.Conv2d(256, 128, (3, 3), stride=(1, 1), padding=(1, 1))
-        self.conv3 = nn.Conv2d(128, 256, (2, 2), stride=(2, 2))
-        self.conv4 = nn.Conv2d(256 + 7, 128, (3, 3), stride=(1, 1), padding=(1, 1))
-        self.conv5 = nn.Conv2d(128, 256, (3, 3), stride=(1, 1), padding=(1, 1))
-        self.conv6 = nn.Conv2d(256, 256, (1, 1), stride=(1, 1))
-        self.conv_skip_1 = nn.Conv2d(256, 256, (2, 2), stride=(2, 2))
-        self.conv_skip_2 = nn.Conv2d(256 + 7, 256, (3, 3), stride=(1, 1), padding=(1, 1))
+        self.conv1 = nn.Conv2d(3, 256, kernel_size=(2, 2), stride=(2, 2))
+        self.conv2 = nn.Conv2d(256, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        self.conv3 = nn.Conv2d(128, 256, kernel_size=(2, 2), stride=(2, 2))
+        self.conv4 = nn.Conv2d(256 + 7, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        self.conv5 = nn.Conv2d(128, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        self.conv6 = nn.Conv2d(256, 256, kernel_size=(1, 1), stride=(1, 1))
+        self.conv_skip_1 = nn.Conv2d(256, 256, kernel_size=(2, 2), stride=(2, 2))
+        self.conv_skip_2 = nn.Conv2d(256 + 7, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
 
     def forward(self, x, v):
         skip_1 = F.relu(self.conv1(x))

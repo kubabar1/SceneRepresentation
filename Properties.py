@@ -17,7 +17,7 @@ class Properties:
 
                  L=12,
                  B=36,
-                 s_max=10,
+                 s_max=100,
                  mi_I=5 * 10 ** (-4),
                  mi_F=5 * 10 ** (-5),
                  mi_N=1.6 * 10 ** 6,

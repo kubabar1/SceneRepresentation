@@ -1,10 +1,12 @@
+import math
+import torchvision
 from torchvision import transforms
 
 from GQN import GQN
 from Properties import Properties
 from dataset.DatasetType import DatasetType
 from Reader import sample_batch_deepmind
-from Utils import sigma, mi, show_image_comparation
+from Utils import sigma, show_image_comparation
 from data_reader import DataReader
 from dataset.ScenesDataset import ScenesDataset, sample_batch
 
@@ -33,7 +35,7 @@ if __name__ == '__main__':
 
     optimizer = optim.Adam(model.parameters(), lr=properties.mi_I, betas=(properties.beta_1, properties.beta_2),
                            eps=properties.epsilon)
-    scheduler = Scheduler(optimizer, mi=mi, mi_I=properties.mi_I, mi_F=properties.mi_F, mi_N=properties.mi_N)
+    scheduler = Scheduler(optimizer, properties=properties)
 
     sigma_t = properties.sigma_I
 
@@ -43,7 +45,7 @@ if __name__ == '__main__':
             else sample_batch_deepmind(deepmind_train_dataset_reader.read(batch_size=properties.B), B=properties.B,
                                        device=properties.device)
 
-        ELBO_loss = model.estimate_ELBO(D, sigma_t)
+        ELBO_loss, _ = model.estimate_ELBO(D, sigma_t)
 
         # TODO: test flow and save model
 
@@ -65,5 +67,4 @@ if __name__ == '__main__':
 
     x_q = model.generate(D_test, v_tensor_ref, sigma_t)
 
-    for i in range(x_q.size()[0]):
-        show_image_comparation(x_tensor_ref[i], v_tensor_ref[i], x_q[i])
+    show_image_comparation(x_q, x_tensor_ref)
