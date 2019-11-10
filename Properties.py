@@ -17,7 +17,7 @@ class Properties:
 
                  L=12,
                  B=32,
-                 s_max=100,
+                 s_max=10000,
                  mi_I=5 * 10 ** (-4),
                  mi_F=5 * 10 ** (-5),
                  mi_N=1.6 * 10 ** 6,
@@ -36,12 +36,15 @@ class Properties:
                  X_depth=3,
                  V_depth=7,
                  Z_depth=3,
-                 test_interval=5,
+                 test_interval=20,
                  generated_images_path="results/generated_images",
+                 generated_images2_path="results/generated_images2",
+                 generated_images3_path="results/generated_images3",
+                 representation_images_path="results/representation_images",
                  referenced_images_path="results/referenced_images",
                  log_file_path="results/logs/results.log",
                  save_images=True,
-                 save_model_interval=10,
+                 save_model_interval=100,
                  save_model_path="results/models"
                  ):
         self.device = device
@@ -93,6 +96,9 @@ class Properties:
 
         self.test_interval = test_interval
         self.generated_images_path = generated_images_path
+        self.generated_images2_path = generated_images2_path
+        self.generated_images3_path = generated_images3_path
+        self.representation_images_path = representation_images_path
         self.referenced_images_path = referenced_images_path
         self.log_file_path = log_file_path
         self.save_images = save_images

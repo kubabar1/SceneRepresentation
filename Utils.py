@@ -39,27 +39,41 @@ def show_image_comparation(generated_x, reverence_x):
     plt.show()
 
 
-def save_image_comparation(generated_x, reference_x, generated_images_path, referenced_images_path, epoch):
+def save_image_comparation(generated_x, generated_x2, generated_x3, reference_x, representation, epoch, generated_images_path, generated_images2_path, generated_images3_path, referenced_images_path, representation_images_path):
     if not os.path.exists(generated_images_path):
         os.makedirs(generated_images_path)
+    if not os.path.exists(generated_images2_path):
+        os.makedirs(generated_images2_path)
+    if not os.path.exists(generated_images3_path):
+        os.makedirs(generated_images3_path)
     if not os.path.exists(referenced_images_path):
         os.makedirs(referenced_images_path)
+    if not os.path.exists(representation_images_path):
+        os.makedirs(representation_images_path)
     torchvision.utils.save_image(generated_x,
                                  os.path.join(generated_images_path, "generated_" + str(epoch) + ".png"),
                                  nrow=int(math.sqrt(generated_x.size()[0])))
+    torchvision.utils.save_image(generated_x2,
+                                 os.path.join(generated_images2_path, "generated2_" + str(epoch) + ".png"),
+                                 nrow=int(math.sqrt(generated_x2.size()[0])))
+    torchvision.utils.save_image(generated_x3,
+                                 os.path.join(generated_images3_path, "generated3_" + str(epoch) + ".png"),
+                                 nrow=int(math.sqrt(generated_x3.size()[0])))
     torchvision.utils.save_image(reference_x,
                                  os.path.join(referenced_images_path, "referenced_" + str(epoch) + ".png"),
                                  nrow=int(math.sqrt(reference_x.size()[0])))
+    torchvision.utils.save_image(representation,
+                                 os.path.join(representation_images_path, "representation_" + str(epoch) + ".png"),
+                                 nrow=int(math.sqrt(representation.size()[0])))
 
 
-def save_model(model, epoch, optimizer, loss, sigma_t, scheduler, save_model_path):
+def save_model(model, epoch, optimizer, loss, sigma_t, save_model_path):
     if not os.path.exists(save_model_path):
         os.makedirs(save_model_path)
     torch.save({
         'epoch': epoch,
         'model_state_dict': model.state_dict(),
         'optimizer_state_dict': optimizer.state_dict(),
-        'scheduler_state_dict': scheduler.state_dict(),
         'loss': loss,
         'sigma_t': sigma_t
     }, os.path.join(save_model_path, "model_" + str(epoch) + ".pt"))
@@ -72,11 +86,10 @@ def load_model(model_path, properties):
     checkpoint = torch.load(model_path)
     model.load_state_dict(checkpoint['model_state_dict'])
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-    scheduler = checkpoint['scheduler_state_dict']
     epoch = checkpoint['epoch']
     loss = checkpoint['loss']
     sigma_t = checkpoint['sigma_t']
-    return model, epoch, optimizer, loss, sigma_t, scheduler
+    return model, epoch, optimizer, loss, sigma_t
 
 
 def test(text: str, align: bool = True) -> str:

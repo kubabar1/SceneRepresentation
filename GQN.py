@@ -35,6 +35,7 @@ class GQN(nn.Module):
         self.down_sample_x_q = nn.Conv2d(properties.X_depth, properties.X_depth, (4, 4), stride=(4, 4))
         self.down_sample_u = nn.Conv2d(properties.U_depth, properties.U_depth, (4, 4), stride=(4, 4))
         self.up_sample_h_g = nn.ConvTranspose2d(properties.H_g_depth, properties.H_g_depth, (4, 4), stride=(4, 4))
+        self.ttmmpp = nn.ConvTranspose2d(self.properties.R_depth, self.properties.X_depth, (4, 4), stride=(4, 4))
 
     def estimate_ELBO(self, D, sigma_t):
         device = self.properties.device
@@ -91,7 +92,7 @@ class GQN(nn.Module):
 
         return ELBO, kl
 
-    def generate(self, test_data, v_q):
+    def generate(self, test_data, v_q, sigma_t):
         device = self.properties.device
         [x_tensors, v_tensors] = test_data
         M = len(x_tensors)
@@ -130,4 +131,7 @@ class GQN(nn.Module):
 
         # version 3
         x_q = self.down_sample_u_res(u)
-        return torch.sigmoid(x_q)
+        return torch.sigmoid(x_q), \
+               torch.clamp(torch.distributions.Normal(self.down_sample_u_res(u), sigma_t).rsample(), 0, 1), \
+               torch.clamp(self.down_sample_u_res(u), 0, 1), \
+               torch.clamp(self.ttmmpp(r), 0, 1)
