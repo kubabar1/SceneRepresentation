@@ -4,8 +4,7 @@ import torch
 import matplotlib.pyplot as plt
 import torchvision
 from torch import optim
-
-from GQN import GQN
+from GQN.GQN import GQN
 
 
 def mi(mi_I, mi_F, mi_N, t):

@@ -1,21 +1,20 @@
 import os.path
 import torch
 from torchvision import transforms
-from GQN import GQN
-from Properties import Properties
+from GQN.GQN import GQN
+from GQN.nn.optim.Scheduler import Scheduler
 from dataset.DatasetType import DatasetType
-from Utils import sigma, save_model, save_image_comparation, load_model
-from dataset.ScenesDataset import ScenesDataset, sample_batch
+from GQN.Utils import sigma, save_model, save_image_comparation, load_model
+from dataset.local_dataset.ScenesDataset import ScenesDataset, sample_batch
 from torch import optim
 from dataset.deepmind_dataset.Reader import sample_batch_deepmind
 from dataset.deepmind_dataset.data_reader import DataReader
-from nn.optim.Scheduler import Scheduler
 import logging
 
 
 class Train:
-    def __init__(self):
-        self.properties = Properties()
+    def __init__(self, properties):
+        self.properties = properties
         self.transform = transforms.Compose([transforms.Resize(self.properties.image_resize)])
 
     def train(self):

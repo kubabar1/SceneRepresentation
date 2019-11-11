@@ -1,6 +1,6 @@
 import os
 
-rooms_ring_camera = '../datasets/rooms_ring_camera'
+rooms_ring_camera = '../../dataset/deepmind_dataset/datasets/rooms_ring_camera'
 
 
 # ===============================================================================================
@@ -19,7 +19,7 @@ def rename_rooms_ring_camera_after_download():
         new_name = filename[1:7] + str(24) + filename[10:]
         print(new_name)
         # os.rename(os.path.join(rooms_ring_camera + "/test", filename), new_name)
-    print("#####################################3")
+    print("#####################################")
     for filename in os.listdir(rooms_ring_camera + "/train"):
         new_name = filename[1:8] + str(216) + filename[12:]
         print(new_name)

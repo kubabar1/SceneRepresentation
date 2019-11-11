@@ -1,18 +1,17 @@
 import torch
-
 from dataset.DatasetType import DatasetType
-from nn.cnn.RepresentationNNTypes import RepresentationNNTypes
+from GQN.nn.cnn.RepresentationNNTypes import RepresentationNNTypes
 
 
 class Properties:
     def __init__(self,
                  device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
                  dataset_type=DatasetType.DEEPMIND,
-                 data_path='dataset/data',
-                 json_path='dataset/data/observations.json',
-                 deepmind_dataset='rooms_ring_camera',
+                 data_path=None,
+                 json_path=None,
+                 deepmind_dataset=None,
                  deepmind_dataset_context_size=9,
-                 deepmind_dataset_root_path='dataset/deepmind_dataset/datasets',
+                 deepmind_dataset_root_path=None,
                  representation=RepresentationNNTypes.TOWER,
 
                  L=12,

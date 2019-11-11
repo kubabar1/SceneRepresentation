@@ -1,12 +1,11 @@
 import torch.distributions
 from torch import nn
 from torch.distributions import kl_divergence, Normal
-
-from nn.cnn.RepresentationNNTypes import RepresentationNNTypes
-from nn.cnn.TowerRepresentationNN import TowerRepresentationNN
-from nn.cnn.PyramidRepresentationNN import PyramidRepresentationNN
-from nn.cnn.PoolRepresentationNN import PoolRepresentationNN
-from nn.lstm.LSTMcellGQN import LSTMcellGQN
+from GQN.nn.cnn.RepresentationNNTypes import RepresentationNNTypes
+from GQN.nn.cnn.TowerRepresentationNN import TowerRepresentationNN
+from GQN.nn.cnn import PyramidRepresentationNN
+from GQN.nn.cnn import PoolRepresentationNN
+from GQN.nn.lstm.LSTMcellGQN import LSTMcellGQN
 
 
 class GQN(nn.Module):

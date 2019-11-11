@@ -5,8 +5,8 @@ import numpy as np
 import torch
 from PIL import Image, ImageTk
 import math
-from Properties import Properties
-from Utils import load_model
+from GQN.Properties import Properties
+from GQN.Utils import load_model
 from dataset.deepmind_dataset.Reader import sample_batch_deepmind
 from dataset.deepmind_dataset.data_reader import DataReader
 
@@ -102,7 +102,11 @@ def download_sample_data_from_deepmind_dataset(properties):
 
 if __name__ == "__main__":
     model_path = 'results/models/model_7750.pt'
-    properties = Properties()
+    properties = Properties(
+        data_path='dataset/local_dataset/blender_dataset',
+        json_path='dataset/local_dataset/blender_dataset/observations.json',
+        deepmind_dataset='rooms_ring_camera',
+        deepmind_dataset_root_path='dataset/deepmind_dataset/datasets')
     model, _, _, _, sigma_t = load_model(model_path, properties)
     model = model.to(properties.device)
     x, v, v_q = download_sample_data_from_deepmind_dataset(properties)

@@ -1,5 +1,5 @@
 from torch.optim.lr_scheduler import _LRScheduler
-from Utils import mi
+from GQN.Utils import mi
 
 
 class Scheduler(_LRScheduler):
