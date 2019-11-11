@@ -1,23 +1,22 @@
 import torch
-
 from dataset.DatasetType import DatasetType
-from nn.cnn.RepresentationNNTypes import RepresentationNNTypes
+from GQN.nn.cnn.RepresentationNNTypes import RepresentationNNTypes
 
 
 class Properties:
     def __init__(self,
                  device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
                  dataset_type=DatasetType.DEEPMIND,
-                 data_path='data',
-                 json_path='data/observations.json',
-                 deepmind_dataset='rooms_ring_camera',
+                 data_path=None,
+                 json_path=None,
+                 deepmind_dataset=None,
                  deepmind_dataset_context_size=9,
-                 deepmind_dataset_root_path='dataset/deepmind_dataset/datasets',
+                 deepmind_dataset_root_path=None,
                  representation=RepresentationNNTypes.TOWER,
 
                  L=12,
-                 B=36,
-                 s_max=10,
+                 B=32,
+                 s_max=100000,
                  mi_I=5 * 10 ** (-4),
                  mi_F=5 * 10 ** (-5),
                  mi_N=1.6 * 10 ** 6,
@@ -35,8 +34,17 @@ class Properties:
                  R_depth=256,
                  X_depth=3,
                  V_depth=7,
-                 Z_depth=3
-
+                 Z_depth=3,
+                 test_interval=20,
+                 generated_images_path="results/generated_images",
+                 generated_images2_path="results/generated_images2",
+                 generated_images3_path="results/generated_images3",
+                 representation_images_path="results/representation_images",
+                 referenced_images_path="results/referenced_images",
+                 log_file_path="results/logs/results.log",
+                 save_images=True,
+                 save_model_interval=250,
+                 save_model_path="results/models"
                  ):
         self.device = device
 
@@ -84,3 +92,14 @@ class Properties:
         self.Z_depth = Z_depth
 
         self.Z_dim = 16  # TODO make adjustable by constructor (check if possible)
+
+        self.test_interval = test_interval
+        self.generated_images_path = generated_images_path
+        self.generated_images2_path = generated_images2_path
+        self.generated_images3_path = generated_images3_path
+        self.representation_images_path = representation_images_path
+        self.referenced_images_path = referenced_images_path
+        self.log_file_path = log_file_path
+        self.save_images = save_images
+        self.save_model_interval = save_model_interval
+        self.save_model_path = save_model_path
