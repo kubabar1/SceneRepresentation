@@ -17,7 +17,7 @@ class Properties:
 
                  L=12,
                  B=32,
-                 s_max=10000,
+                 s_max=100000,
                  mi_I=5 * 10 ** (-4),
                  mi_F=5 * 10 ** (-5),
                  mi_N=1.6 * 10 ** 6,
@@ -44,7 +44,7 @@ class Properties:
                  referenced_images_path="results/referenced_images",
                  log_file_path="results/logs/results.log",
                  save_images=True,
-                 save_model_interval=100,
+                 save_model_interval=250,
                  save_model_path="results/models"
                  ):
         self.device = device

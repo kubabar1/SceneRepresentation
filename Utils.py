@@ -34,12 +34,14 @@ def show_image_comparation(generated_x, reverence_x):
     plt.figure(2)
     plt.axis('off')
     plt.imshow(
-        torchvision.utils.make_grid(reverence_x, nrow=int(math.sqrt(generated_x.size()[0]))).cpu().numpy().transpose(
+        torchvision.utils.make_grid(reverence_x, nrow=int(math.sqrt(reverence_x.size()[0]))).cpu().numpy().transpose(
             (1, 2, 0)))
     plt.show()
 
 
-def save_image_comparation(generated_x, generated_x2, generated_x3, reference_x, representation, epoch, generated_images_path, generated_images2_path, generated_images3_path, referenced_images_path, representation_images_path):
+def save_image_comparation(generated_x, generated_x2, generated_x3, reference_x, representation, epoch,
+                           generated_images_path, generated_images2_path, generated_images3_path,
+                           referenced_images_path, representation_images_path):
     if not os.path.exists(generated_images_path):
         os.makedirs(generated_images_path)
     if not os.path.exists(generated_images2_path):
