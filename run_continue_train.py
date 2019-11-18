@@ -8,4 +8,4 @@ if __name__ == "__main__":
         deepmind_dataset='rooms_ring_camera',
         deepmind_dataset_root_path='dataset/deepmind_dataset/datasets')
     train = Train(properties)
-    train.continue_train("results/models/model_7750.pt")
+    train.continue_train("results/models/model_16000.pt")
