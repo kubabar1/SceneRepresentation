@@ -1,5 +1,6 @@
 import os.path
 import torch
+import torch.nn as nn
 from torchvision import transforms
 from GQN.GQN import GQN
 from GQN.nn.optim.Scheduler import Scheduler
@@ -18,7 +19,7 @@ class Train:
         self.transform = transforms.Compose([transforms.Resize(self.properties.image_resize)])
 
     def train(self):
-        model = GQN(self.properties).to(self.properties.device)
+        model = GQN(self.properties)
         optimizer = optim.Adam(model.parameters(), lr=self.properties.mi_I,
                                betas=(self.properties.beta_1, self.properties.beta_2),
                                eps=self.properties.epsilon)
@@ -27,11 +28,14 @@ class Train:
 
     def continue_train(self, model_path):
         model, start_epoch, optimizer, loss, sigma_t = load_model(model_path, self.properties)
-        model = model.to(self.properties.device)
         optimizer = optimizer
         self._train(model=model, optimizer=optimizer, start_epoch=start_epoch + 1, sigma_t=sigma_t)
 
     def _train(self, model, optimizer, start_epoch, sigma_t):
+        if torch.cuda.device_count() > 1:
+            model = nn.DataParallel(model)
+        model.to(self.properties.device)
+
         if not os.path.exists(os.path.dirname(self.properties.log_file_path)):
             os.makedirs(os.path.dirname(self.properties.log_file_path))
         logging.basicConfig(filename=self.properties.log_file_path,
@@ -40,6 +44,8 @@ class Train:
                             )
         logger = logging.getLogger()
         logger.setLevel(logging.INFO)
+
+        logger.info("Using "+str(torch.cuda.device_count())+" GPUs")
 
         scenes_dataset = ScenesDataset(dataset_root_path=self.properties.data_path,
                                        json_path=self.properties.json_path,
@@ -72,7 +78,7 @@ class Train:
                                                    B=self.properties.B,
                                                    device=self.properties.device)
                     [x_tensor_test, v_tensor_test], [x_q_tensor_test, v_q_tensor_test] = D_test
-                    ELBO_loss_test, kl = model.estimate_ELBO(D_test, sigma_t)
+                    ELBO_loss_test, kl = model(D_test, sigma_t)
                     x_q_generated, x_q_generated2, x_q_generated3, representation = model.generate([x_tensor_test, v_tensor_test], v_q_tensor_test, sigma_t)
 
                     log_test_text = "TEST_" + str(epoch) + " ELBO_loss_test=" \
@@ -93,7 +99,7 @@ class Train:
                                                generated_images3_path=self.properties.generated_images3_path,
                                                representation_images_path=self.properties.representation_images_path)
 
-            ELBO_loss, _ = model.estimate_ELBO(D, sigma_t)
+            ELBO_loss, _ = model(D, sigma_t)
             (-ELBO_loss.mean()).backward()
             optimizer.step()
             optimizer.zero_grad()

@@ -101,7 +101,7 @@ def download_sample_data_from_deepmind_dataset(properties):
 
 
 if __name__ == "__main__":
-    model_path = 'results/models/model_7750.pt'
+    model_path = 'results/models/model_16000.pt'
     properties = Properties(
         data_path='dataset/local_dataset/blender_dataset',
         json_path='dataset/local_dataset/blender_dataset/observations.json',

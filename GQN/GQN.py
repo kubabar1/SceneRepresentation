@@ -36,7 +36,7 @@ class GQN(nn.Module):
         self.up_sample_h_g = nn.ConvTranspose2d(properties.H_g_depth, properties.H_g_depth, (4, 4), stride=(4, 4))
         self.ttmmpp = nn.ConvTranspose2d(self.properties.R_depth, self.properties.X_depth, (4, 4), stride=(4, 4))
 
-    def estimate_ELBO(self, D, sigma_t):
+    def forward(self, D, sigma_t):
         device = self.properties.device
         [x, v], [x_q, v_q] = D
         M = len(x)
