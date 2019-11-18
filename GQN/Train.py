@@ -45,6 +45,8 @@ class Train:
         logger = logging.getLogger()
         logger.setLevel(logging.INFO)
 
+        logger.info("Using "+str(torch.cuda.device_count())+" GPUs")
+
         scenes_dataset = ScenesDataset(dataset_root_path=self.properties.data_path,
                                        json_path=self.properties.json_path,
                                        transform=self.transform)
